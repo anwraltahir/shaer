@@ -1,0 +1,8 @@
+{
+  "name": "شعراء السودان - Sudanese Poets",
+  "description": "منصة رقمية أدبية وثقافية لتوثيق الشعر العربي الفصيح للشعراء السودانيين وحفظ الذاكرة الشعرية",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

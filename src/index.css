@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --color-nile: #183C35;
+    --color-sand: #D9B56D;
+    --color-ivory: #F4EFE3;
+    --color-brick: #7D302D;
+    --color-ink: #39352F;
+    --font-amiri: 'Amiri', serif;
+    --font-naskh: 'Noto Naskh Arabic', serif;
+    --font-sans-ar: 'IBM Plex Sans Arabic', sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans-ar);
+  }
+}
+
+.font-amiri {
+  font-family: var(--font-amiri);
+}
+
+.font-naskh {
+  font-family: var(--font-naskh);
+}
+
+.font-sans-ar {
+  font-family: var(--font-sans-ar);
+}
+
+/* Sudanese Nubian geometric motif border accent */
+.nubian-pattern-line {
+  background-image: radial-gradient(#D9B56D 1px, transparent 1px);
+  background-size: 10px 10px;
+}
+
+/* Authentic Poem Couplet Styling */
+.poem-verse-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .poem-verse-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+/* Print styling for printing poems */
+@media print {
+  header, footer, nav, .no-print {
+    display: none !important;
+  }
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
+  .print-area {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
