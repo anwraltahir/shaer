@@ -22,10 +22,12 @@ import {
   X, 
   Star, 
   Plus, 
-  Trash2, 
-  Eye, 
+  Trash2,
+  Eye,
   MessageSquare,
-  Sparkles
+  Sparkles,
+  Pencil,
+  Upload
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -73,6 +75,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [newPoetSchool, setNewPoetSchool] = useState<LiterarySchool>('كلاسيكي عمودي');
   const [newPoetSources, setNewPoetSources] = useState('');
   const [showNewPoetModal, setShowNewPoetModal] = useState(false);
+
+  // Edit Poet Photo State
+  const [editingPoet, setEditingPoet] = useState<PoetProfile | null>(null);
+  const [editImageValue, setEditImageValue] = useState('');
 
   // KPIs
   const pendingApps = applications.filter(a => a.status === 'pending');
@@ -350,6 +356,77 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setNewPoetBio('');
     setNewPoetCity('');
     alert(`تمت إضافة الشاعر «${newPoet.literaryName}» بنجاح.`);
+    doRefresh();
+  };
+
+  // Edit Poet Photo Handlers
+  const handleOpenEditPoetPhoto = (p: PoetProfile) => {
+    setEditingPoet(p);
+    setEditImageValue(p.profileImage);
+  };
+
+  const handleEditImageFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      // Downscale + compress before storing: uploaded photos are kept as
+      // base64 inside localStorage (no backend), which caps out around
+      // 5MB per origin — full-resolution uploads blow through that after
+      // just one or two poets and silently fail to save.
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 480;
+        let { width, height } = img;
+        if (width > height && width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else if (height > maxDim) {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          setEditImageValue(reader.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        setEditImageValue(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSavePoetPhoto = () => {
+    if (!editingPoet || !editImageValue.trim()) return;
+
+    const updatedPoet: PoetProfile = { ...editingPoet, profileImage: editImageValue.trim() };
+    StorageService.savePoet(updatedPoet);
+
+    // localStorage writes fail silently when the quota is full, so verify
+    // the change actually landed before telling the admin it worked.
+    const verify = StorageService.getPoetById(updatedPoet.id);
+    if (verify?.profileImage !== updatedPoet.profileImage) {
+      alert('تعذر حفظ الصورة: مساحة التخزين المحلي في المتصفح ممتلئة. جرّب صورة أصغر، أو استخدم رابط صورة (URL) بدلاً من الرفع المباشر.');
+      return;
+    }
+
+    StorageService.addAuditLog(
+      currentUser?.id || 'admin',
+      currentUser?.fullName || 'المدير العام',
+      'تعديل صورة شاعر',
+      'poet',
+      updatedPoet.id,
+      `تم تحديث الصورة الشخصية للشاعر «${updatedPoet.literaryName}».`
+    );
+
+    alert(`تم تحديث صورة الشاعر «${updatedPoet.literaryName}» بنجاح.`);
+    setEditingPoet(null);
+    setEditImageValue('');
     doRefresh();
   };
 
@@ -814,12 +891,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {poets.map(p => (
               <div key={p.id} className="p-4 rounded-xl bg-white dark:bg-[#162E28] border border-[#D9B56D]/30 flex flex-col justify-between space-y-3">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={p.profileImage}
-                    alt={p.literaryName}
-                    referrerPolicy="no-referrer"
-                    className="w-12 h-12 rounded-lg object-cover border border-[#D9B56D]/40"
-                  />
+                  <div className="relative shrink-0 group">
+                    <img
+                      src={p.profileImage}
+                      alt={p.literaryName}
+                      referrerPolicy="no-referrer"
+                      className="w-12 h-12 rounded-lg object-cover border border-[#D9B56D]/40"
+                    />
+                    <button
+                      onClick={() => handleOpenEditPoetPhoto(p)}
+                      title="تعديل الصورة"
+                      className="absolute -bottom-1.5 -left-1.5 w-6 h-6 rounded-full bg-[#183C35] text-[#D9B56D] border border-[#D9B56D]/60 flex items-center justify-center shadow-xs hover:bg-[#122e28]"
+                    >
+                      <Pencil size={11} />
+                    </button>
+                  </div>
                   <div>
                     <h4 className="font-amiri font-bold text-base text-[#183C35] dark:text-[#D9B56D]">{p.literaryName}</h4>
                     <p className="text-xs text-stone-500">{p.city} · {p.literarySchool}</p>
@@ -968,6 +1054,78 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+
+          {/* Modal to edit an existing poet's photo */}
+          {editingPoet && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+              <div className="w-full max-w-md bg-white dark:bg-[#162E28] rounded-2xl border border-[#D9B56D]/40 p-6 shadow-2xl text-right space-y-4">
+                <div className="flex items-center justify-between border-b border-[#D9B56D]/20 pb-2">
+                  <h3 className="font-amiri text-xl font-bold text-[#183C35] dark:text-[#D9B56D]">
+                    تعديل صورة: {editingPoet.literaryName}
+                  </h3>
+                  <button onClick={() => { setEditingPoet(null); setEditImageValue(''); }} className="text-stone-400">
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div className="flex justify-center">
+                  <img
+                    src={editImageValue}
+                    alt={editingPoet.literaryName}
+                    referrerPolicy="no-referrer"
+                    className="w-28 h-28 rounded-xl object-cover border-2 border-[#D9B56D]/50"
+                  />
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="block font-bold text-[#183C35] dark:text-[#D9B56D] mb-1">
+                      رفع صورة من الجهاز
+                    </label>
+                    <label className="flex items-center justify-center gap-2 w-full p-3 rounded-lg border-2 border-dashed border-[#D9B56D]/40 text-[#183C35] dark:text-[#D9B56D] cursor-pointer hover:bg-[#D9B56D]/10">
+                      <Upload size={15} />
+                      <span>اختر ملف صورة...</span>
+                      <input type="file" accept="image/*" onChange={handleEditImageFile} className="hidden" />
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-stone-400">
+                    <div className="flex-1 h-px bg-[#D9B56D]/20" />
+                    <span>أو</span>
+                    <div className="flex-1 h-px bg-[#D9B56D]/20" />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-[#183C35] dark:text-[#D9B56D] mb-1">
+                      رابط الصورة (URL)
+                    </label>
+                    <input
+                      type="text"
+                      value={editImageValue.startsWith('data:') ? '' : editImageValue}
+                      onChange={(e) => setEditImageValue(e.target.value)}
+                      placeholder="https://..."
+                      className="w-full p-2 rounded-lg border border-[#D9B56D]/30 bg-[#F4EFE3]/30 dark:bg-[#0D1D1A]/30 text-[#183C35] dark:text-[#F4EFE3] outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2 border-t border-[#D9B56D]/20">
+                  <button
+                    onClick={() => { setEditingPoet(null); setEditImageValue(''); }}
+                    className="px-3 py-1.5 rounded-lg text-stone-500 text-xs"
+                  >
+                    إلغاء
+                  </button>
+                  <button
+                    onClick={handleSavePoetPhoto}
+                    className="px-4 py-1.5 bg-[#183C35] text-[#D9B56D] font-bold rounded-lg text-xs"
+                  >
+                    حفظ الصورة
+                  </button>
+                </div>
               </div>
             </div>
           )}

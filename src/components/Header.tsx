@@ -66,12 +66,12 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[#F4EFE3]/95 dark:bg-[#0D1D1A]/95 backdrop-blur-md border-b border-[#D9B56D]/30 transition-colors duration-200">
-      {/* Role Testing Strip - allows instant previewing across Admin, Poet, Pending, and Reader */}
+      {/* Role Testing Strip - allows instant previewing across Poet, Pending, and Reader. Admin is excluded: it requires real password login. */}
       <div className="bg-[#183C35] text-[#D9B56D] text-xs py-1 px-4 sm:px-8 border-b border-[#D9B56D]/20 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="font-medium text-[#F4EFE3]/90">وضع المعاينة للأدوار:</span>
           <div className="hidden sm:flex items-center gap-1.5">
-            {(['admin', 'approved_poet', 'pending_poet', 'reader'] as UserRole[]).map((r) => (
+            {(['approved_poet', 'pending_poet', 'reader'] as UserRole[]).map((r) => (
               <button
                 key={r}
                 onClick={() => switchRoleDemo(r)}
@@ -92,20 +92,21 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Main Top Bar Contract: Zone 1 (Brand), Zone 2 (Nav Links), Zone 3 (Action Controls) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3 sm:gap-8">
         {/* Zone 1: Brand Wordmark with Nubian Emblem */}
         <button
           onClick={() => handleNavClick('home')}
-          className="flex items-center gap-3 text-right group whitespace-nowrap shrink-0 focus-visible:outline-hidden"
+          className="flex items-center gap-2 sm:gap-3 text-right group min-w-0 focus-visible:outline-hidden"
         >
-          <div className="relative">
-            <SudaneseEmblem size={38} />
+          <div className="relative shrink-0">
+            <SudaneseEmblem size={32} className="sm:hidden" />
+            <SudaneseEmblem size={38} className="hidden sm:block" />
           </div>
-          <div className="flex flex-col text-right">
-            <span className="font-amiri text-2xl font-bold tracking-tight text-[#183C35] dark:text-[#D9B56D] group-hover:text-[#7D302D] dark:group-hover:text-white transition-colors">
+          <div className="flex flex-col text-right min-w-0">
+            <span className="font-amiri text-lg sm:text-2xl font-bold tracking-tight text-[#183C35] dark:text-[#D9B56D] group-hover:text-[#7D302D] dark:group-hover:text-white transition-colors whitespace-nowrap truncate">
               شعراء السودان
             </span>
-            <span className="text-[10px] tracking-widest text-[#39352F]/70 dark:text-[#F4EFE3]/60 uppercase font-sans-ar -mt-1">
+            <span className="hidden sm:block text-[10px] tracking-widest text-[#39352F]/70 dark:text-[#F4EFE3]/60 uppercase font-sans-ar -mt-1 whitespace-nowrap">
               Sudanese Poets · ديوان الفصحى
             </span>
           </div>
@@ -135,11 +136,11 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         {/* Zone 3: Primary Action & Utilities */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-3 shrink-0">
           {/* Quick Search */}
           <button
             onClick={onOpenSearch}
-            className="p-2 text-[#39352F]/80 dark:text-[#F4EFE3]/80 hover:text-[#183C35] dark:hover:text-[#D9B56D] hover:bg-[#D9B56D]/15 rounded-lg transition-colors"
+            className="p-1.5 sm:p-2 text-[#39352F]/80 dark:text-[#F4EFE3]/80 hover:text-[#183C35] dark:hover:text-[#D9B56D] hover:bg-[#D9B56D]/15 rounded-lg transition-colors"
             title="البحث الذكي في القصائد والشعراء"
             aria-label="بحث"
           >
@@ -149,7 +150,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 text-[#39352F]/80 dark:text-[#F4EFE3]/80 hover:text-[#183C35] dark:hover:text-[#D9B56D] hover:bg-[#D9B56D]/15 rounded-lg transition-colors"
+            className="p-1.5 sm:p-2 text-[#39352F]/80 dark:text-[#F4EFE3]/80 hover:text-[#183C35] dark:hover:text-[#D9B56D] hover:bg-[#D9B56D]/15 rounded-lg transition-colors"
             title={theme === 'dark' ? 'التبديل إلى الوضع الفاتح' : 'التبديل إلى الوضع الداكن'}
             aria-label="تبديل المظهر"
           >
@@ -265,7 +266,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
               <button
                 onClick={() => handleNavClick('apply-poet')}
-                className="px-4 py-2 text-xs font-bold text-[#183C35] bg-[#D9B56D] hover:bg-[#e4c27a] rounded-lg transition-all shadow-xs flex items-center gap-1.5 whitespace-nowrap"
+                className="hidden sm:flex px-4 py-2 text-xs font-bold text-[#183C35] bg-[#D9B56D] hover:bg-[#e4c27a] rounded-lg transition-all shadow-xs items-center gap-1.5 whitespace-nowrap"
               >
                 <Feather size={14} />
                 <span>انضم إلى الديوان</span>

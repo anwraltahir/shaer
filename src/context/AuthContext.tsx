@@ -56,13 +56,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const login = async (email: string): Promise<{ success: boolean; message: string }> => {
+  const login = async (email: string, password?: string): Promise<{ success: boolean; message: string }> => {
     const user = StorageService.getUserByEmail(email);
     if (!user) {
       return { success: false, message: 'لم يتم العثور على حساب بهذا البريد الإلكتروني.' };
     }
     if (user.accountStatus === 'suspended') {
       return { success: false, message: 'عذراً، هذا الحساب موقوف من قِبل إدارة المنصة.' };
+    }
+    if (user.password && user.password !== password) {
+      return { success: false, message: 'كلمة المرور غير صحيحة.' };
     }
     setCurrentUser(user);
     StorageService.setCurrentUser(user);
@@ -101,6 +104,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const switchRoleDemo = (role: UserRole) => {
+    // Admin must authenticate with the real password-protected login —
+    // never grant it through the one-click demo role switcher.
+    if (role === 'admin') return;
+
     const users = StorageService.getUsers();
     let target = users.find(u => u.role === role);
     if (!target) {

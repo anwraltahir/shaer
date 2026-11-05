@@ -3,7 +3,6 @@ import { StorageService } from '../services/storage';
 import { PoetProfile, Poem, Category } from '../types';
 import { PoetCard } from '../components/PoetCard';
 import { PoemCard } from '../components/PoemCard';
-import { SudaneseEmblem, NubianDivider } from '../components/SudaneseEmblem';
 import { 
   Search, 
   Feather, 
@@ -77,11 +76,6 @@ export const HomePage: React.FC<HomePageProps> = ({
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-5xl mx-auto px-6 py-20 sm:py-28 text-center text-[#F4EFE3] space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D9B56D]/20 border border-[#D9B56D]/40 text-[#D9B56D] text-xs font-semibold">
-            <SudaneseEmblem size={18} />
-            <span>المرجع الرقمي الأول للشعر العربي الفصيح في السودان</span>
-          </div>
-
           <h1 className="font-amiri text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#F4EFE3] text-balance">
             «هنا تسكن القصيدة السودانية»
           </h1>

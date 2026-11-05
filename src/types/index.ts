@@ -6,6 +6,7 @@ export interface User {
   email: string;
   phone?: string;
   role: UserRole;
+  password?: string;
   accountStatus: 'active' | 'suspended';
   createdAt: string;
   updatedAt: string;

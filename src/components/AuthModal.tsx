@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { SudaneseEmblem } from './SudaneseEmblem';
-import { X, Mail, Lock, User, Feather, ShieldCheck, CheckCircle } from 'lucide-react';
+import { X, Mail, Lock, User, Feather, CheckCircle } from 'lucide-react';
 import { UserRole } from '../types';
 
 interface AuthModalProps {
@@ -38,7 +38,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setErrorMsg('يرجى إدخال البريد الإلكتروني.');
         return;
       }
-      const res = await login(email.trim());
+      const res = await login(email.trim(), password);
       if (res.success) {
         setSuccessMsg(res.message);
         setTimeout(() => onClose(), 800);
@@ -85,19 +85,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
 
-        {/* Quick Demo Switcher Strip for Reviewers */}
+        {/* Quick Demo Switcher Strip for Reviewers (Admin excluded: requires real password login) */}
         <div className="my-4 p-3 bg-[#F4EFE3] dark:bg-[#0D1D1A] rounded-xl border border-[#D9B56D]/25">
           <p className="text-[11px] font-bold text-[#183C35] dark:text-[#D9B56D] mb-2">
             دخول فوري بحسابات الاختبار المجهزة:
           </p>
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <button
-              onClick={() => handleQuickDemoLogin('admin')}
-              className="py-1.5 px-2 bg-white dark:bg-[#162E28] border border-[#D9B56D]/30 rounded-lg text-right hover:border-[#D9B56D] transition-colors flex items-center gap-1.5"
-            >
-              <ShieldCheck size={14} className="text-[#D9B56D] shrink-0" />
-              <span className="font-medium text-[#183C35] dark:text-[#F4EFE3] truncate">المدير العام (Admin)</span>
-            </button>
             <button
               onClick={() => handleQuickDemoLogin('approved_poet')}
               className="py-1.5 px-2 bg-white dark:bg-[#162E28] border border-[#D9B56D]/30 rounded-lg text-right hover:border-[#D9B56D] transition-colors flex items-center gap-1.5"
